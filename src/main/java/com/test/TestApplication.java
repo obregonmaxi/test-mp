@@ -3,8 +3,6 @@ package com.test;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,32 +28,26 @@ public class TestApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TestApplication.class, args);
 
-		ExecutorService es = Executors.newSingleThreadExecutor();
-
+		System.out.print("Cargando");
 		for (offset = 0; offset < 900; offset = offset + 50) {
-			es.submit(() -> {
-				getData();
-				if (flag == false) {
-					calculate();
-				}
-			});
+			getData();
+			System.out.print('.');
 		}
+		calculate();
 	}
 
 	private static void calculate() {
 
 		Map<String, Integer> map = new HashMap<String, Integer>();
 
-		if (offset == 900) {
-			flag = true;
-			System.out.println("\n");
-			for (String key : mapCounter.keySet()) {
-				map.put(key, mapTotal.get(key) / mapCounter.get(key));
-			}
-			for (String key : map.keySet()) {
-				System.out.println(key + " Promedio: $" + map.get(key));
-			}
+		System.out.println("\n");
+		for (String key : mapCounter.keySet()) {
+			map.put(key, mapTotal.get(key) / mapCounter.get(key));
 		}
+		for (String key : map.keySet()) {
+			System.out.println(key + " Promedio: $" + map.get(key));
+		}
+
 	}
 
 	private static void getData() {
@@ -77,32 +69,26 @@ public class TestApplication {
 					JsonObject attribute = (JsonObject) a;
 					try {
 						if (attribute.get("id").getAsString().equals("BRAND")) {
-//							System.out.println(attribute.get("value_name").getAsString());
-//							System.out.println(moto.get("price").getAsString());
+
 							if (mapTotal.containsKey(attribute.get("value_name").getAsString())) {
 								mapTotal.put(attribute.get("value_name").getAsString(),
 										mapTotal.get(attribute.get("value_name").getAsString())
 												+ moto.get("price").getAsInt());
-//								System.out.println(mapTotal.get(attribute.get("value_name").getAsString()));
 								mapCounter.put(attribute.get("value_name").getAsString(),
 										mapCounter.get(attribute.get("value_name").getAsString()) + 1);
 							} else {
 								mapTotal.put(attribute.get("value_name").getAsString(), moto.get("price").getAsInt());
 								mapCounter.put(attribute.get("value_name").getAsString(), 1);
-//								System.out.println(mapTotal.get(attribute.get("value_name").getAsString()));
 							}
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-
 				});
 			});
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
-
 }
